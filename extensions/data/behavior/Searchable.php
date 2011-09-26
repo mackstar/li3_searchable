@@ -42,9 +42,9 @@ class Searchable extends \lithium\core\StaticObject {
 	 */
 	public static function bind($class, array $config = array()) {
 
-		$default = array('method' => 'or');
-		$default += $config;
-		static::$_configurations = $default;
+		$default = array('method' => 'or', 'nonExploded' => array());
+		$config += $default;
+		static::$_configurations = $config;
 		static::_save($class);
 
 
@@ -83,8 +83,20 @@ class Searchable extends \lithium\core\StaticObject {
 	protected static function _save($class) {
 
 		$fields = static::$_configurations['fields'];
+		$nonExploded = static::$_configurations['nonExploded'];
 
-		$class::applyFilter('save', function($self, $params, $chain) use ($fields) {
+		$class::applyFilter('save', function($self, $params, $chain) use ($fields, $nonExploded) {
+			
+			$explode = function($key, $value, $keywords) use ($nonExploded) {
+				if (in_array($key, $nonExploded)) {
+					$new = array($value);
+				}
+				else {
+					$new = explode(' ', $value);
+				}
+				return array_merge($new, $keywords);
+			};
+
 			$entity = $params['entity'];
 
 			if ($params['data']) {
@@ -96,7 +108,7 @@ class Searchable extends \lithium\core\StaticObject {
 			foreach ($fields as $field){
 				if (strpos($field, '.') === false) {
 					if (isset($data[$field])) {
-						$keywords = array_merge(explode(' ', $data[$field]), $keywords);
+						$keywords = $explode($field, $data[$field], $keywords);
 					}
 				}
 				// If a dot exists we need to enumerate it to find what we need
@@ -107,6 +119,9 @@ class Searchable extends \lithium\core\StaticObject {
 					for ($i = 0; $i <= $length; $i++) {
 						$key = $path[$i];
 						// Likely to be the array we want
+						if ($i == $length && !is_numeric($key) && isset($current[$key])) {
+							$keywords = $explode($key, $current[$key], $keywords);
+						}
 						if (!isset($current[$key]) && isset ($current[0])) {
 							$content = array_map(function($row) use ($key){
 								if(isset($row[$key])) {
@@ -115,13 +130,14 @@ class Searchable extends \lithium\core\StaticObject {
 								return null;	
 							}, $current);
 							foreach ($content as $keyword) {
-								$keywords = array_merge(explode(' ', $keyword), $keywords);
+								$keywords = $explode($key, $keyword, $keywords);
 							}
 						}
 						elseif(isset($current[$key])) {
 							$current = $current[$key];
 						}
 					}
+					
 				}
 			}
 			$entity->_keywords = array_map('strtolower', $keywords);
