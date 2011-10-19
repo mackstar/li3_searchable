@@ -49,8 +49,10 @@ class Searchable extends \lithium\core\StaticObject {
 
 
 		$method = static::$_configurations['method'];
-
-		$finder = function($self, $params, $chain) use ($class, $method) {
+		
+		// Putting search logic into its own anonymous function so that
+		// we can use it for search and count search
+		$searchLogic = function($params, $method) {
 			$search = explode(' ', strtolower($params['options']['q']));
 
 			if (count($search) > 1) {
@@ -64,11 +66,21 @@ class Searchable extends \lithium\core\StaticObject {
 					'_keywords' => array('like' => '/' . $search[0] . '/')
 				);
 			}
-			return $chain->next($self, $params, $chain);
+			return $params;
 		};
 
+		$finder = function($self, $params, $chain) use ($class, $method, $searchLogic) {
+			$params = $searchLogic($params,  $method);
+			return $chain->next($self, $params, $chain);
+		};
+		
+		$counter = function($self, $params, $chain) use ($class, $method, $searchLogic) {
+			$params = $searchLogic($params,  $method);
+			return $class::count(array('conditions' => $params['options']['conditions']));
+		};
 
 		$class::finder('search', $finder);
+		$class::finder('searchCount', $counter);
 
 		return static::$_configurations[$class] = $config;
 	}
