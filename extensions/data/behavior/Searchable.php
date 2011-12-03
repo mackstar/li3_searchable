@@ -71,8 +71,6 @@ class Searchable extends \lithium\core\StaticObject {
 
 		$finder = function($self, $params, $chain) use ($class, $method, $searchLogic) {
 			$params = $searchLogic($params,  $method);
-			var_dump($params);
-			exit;
 			return $chain->next($self, $params, $chain);
 		};
 		
