@@ -54,7 +54,10 @@ class Searchable extends \lithium\core\StaticObject {
 		// we can use it for search and count search
 		$searchLogic = function($params, $method) {
 			$search = explode(' ', strtolower($params['options']['q']));
-
+			
+			if(!isset($params['options']['conditions'])) {
+				$params['options']['conditions'] = array();
+			}
 			if (count($search) > 1) {
 				$params['options']['conditions'] += array(
 					'$' . $method => array_map(function($term){
