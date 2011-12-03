@@ -56,13 +56,13 @@ class Searchable extends \lithium\core\StaticObject {
 			$search = explode(' ', strtolower($params['options']['q']));
 
 			if (count($search) > 1) {
-				$params['options']['conditions'] = array(
+				$params['options']['conditions'] += array(
 					'$' . $method => array_map(function($term){
 						return array('_keywords' => array('like' => '/' . $term . '/'));
 					}, $search));
 			}
 			else {
-				$params['options']['conditions'] = array(
+				$params['options']['conditions'] += array(
 					'_keywords' => array('like' => '/' . $search[0] . '/')
 				);
 			}
@@ -71,6 +71,8 @@ class Searchable extends \lithium\core\StaticObject {
 
 		$finder = function($self, $params, $chain) use ($class, $method, $searchLogic) {
 			$params = $searchLogic($params,  $method);
+			var_dump($params);
+			exit;
 			return $chain->next($self, $params, $chain);
 		};
 		
