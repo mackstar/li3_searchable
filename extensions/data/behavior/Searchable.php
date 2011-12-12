@@ -154,6 +154,12 @@ class Searchable extends \lithium\core\StaticObject {
 					}
 					
 				}
+
+				for ($i=0; $i < count($keywords); $i++) {
+					if ($keywords[$i] == '') {
+						unset($keywords[$i]);
+					}
+				}
 			}
 			$entity->_keywords = array_map('strtolower', $keywords);
 			$params['entity'] = $entity;
