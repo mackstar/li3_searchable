@@ -19,7 +19,7 @@ class SearchableTest extends \lithium\test\Unit {
 	public function testInitiallyWorking() {
 
 		$user = UsersMock::create(array(
-			'name' => 'Ricky Macky'
+			'name' => 'Ricky Macky Ricky'
 		));
 		$this->assertTrue($user->save());
 
