@@ -41,6 +41,10 @@ class SearchableTest extends \lithium\test\Unit {
 		$users = UsersMock::search('all', array('q'=>'boo hoo'));
 		$this->assertEqual(0, count($users));
 
+		$users = UsersMock::search('first', array('q'=>'Ricky'));
+		$this->assertEqual(2, count($users[0]->_keywords));
+
+
 		UsersMock::remove();
 
 		$user = UsersMock::create(array(
