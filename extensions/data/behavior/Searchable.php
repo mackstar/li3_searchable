@@ -161,7 +161,7 @@ class Searchable extends \lithium\core\StaticObject {
 					}
 				}
 			}
-			$entity->_keywords = array_map('strtolower', $keywords);
+			$entity->_keywords = array_unique(array_map('strtolower', $keywords));
 			$params['entity'] = $entity;
 			return $chain->next($self, $params, $chain);
 		});
