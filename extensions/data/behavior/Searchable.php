@@ -151,17 +151,27 @@ class Searchable extends \lithium\core\StaticObject {
 						elseif(isset($current[$key])) {
 							$current = $current[$key];
 						}
-					}
-					
+					}					
 				}
 
 				for ($i=0; $i < count($keywords); $i++) {
-					if (isset($keywords[$i]) && $keywords[$i] == '') {
+					if ($keywords[$i] == '') {
 						unset($keywords[$i]);
 					}
 				}
 			}
-			$entity->_keywords = array_unique(array_map('strtolower', $keywords));
+			$map = array_map('strtolower', $keywords);
+			$keywords = array_unique($map);	// in order to avoid duplicate keywords
+			
+			/* Note that keys are preserved with array_unique. We don't want this, so we create 
+			 * a new array() and push all the values from $map inside $new.
+			*/
+			
+			$new = array();
+			foreach ($keywords as $key) {
+				array_push($new, $key);
+			}
+			$entity->_keywords = $new;
 			$params['entity'] = $entity;
 			return $chain->next($self, $params, $chain);
 		});
