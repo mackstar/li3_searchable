@@ -59,14 +59,18 @@ class Searchable extends \lithium\core\StaticObject {
 				$params['options']['conditions'] = array();
 			}
 			if (count($search) > 1) {
-				$params['options']['conditions'] += array(
-					'$' . $method => array_map(function($term){
-						return array('_keywords' => array('like' => '/' . $term . '/'));
-					}, $search));
+				$search_regex_array = array();
+				foreach ($search as $p_q) {
+					array_push($search_regex_array, new \MongoRegex('/'.$p_q.'/i'));
+				}
+				$params['options']['conditions'] += 
+				array('_keywords' => array('$all' => $search_regex_array));
+					
 			}
 			else {
+				$search_regex = new \MongoRegex('/'.$search[0].'/i');
 				$params['options']['conditions'] += array(
-					'_keywords' => array('like' => '/' . $search[0] . '/')
+					'_keywords' => array('$all' => array($search_regex))
 				);
 			}
 			return $params;
