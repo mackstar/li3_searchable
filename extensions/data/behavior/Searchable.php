@@ -160,7 +160,7 @@ class Searchable extends \lithium\core\StaticObject {
 				}
 
 				for ($i=0; $i < count($keywords); $i++) {
-					if ($keywords[$i] == '') {
+					if (isset($keywords[$i]) &&  ($keywords[$i] == '')) {
 						unset($keywords[$i]);
 					}
 				}
